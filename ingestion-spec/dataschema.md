@@ -4,6 +4,8 @@ Druid 摄入规格中包含三个元素：
     {"dataSchema":{...},"ioConfig":{...},"tuningConfig":{...}}
 ## DataSchema
 指定传入数据的架构。所有摄入的规格可以共享相同的dataschema。
+```json
+ "dataSchema":{"dataSource":"source","parser":{...},"metricsSpec":{...},granularitySpec:{...}}```
 一个dataSchema的例子：
 ```json
 "dataSchema":{
@@ -56,9 +58,8 @@ Druid 摄入规格中包含三个元素：
 
 　　　　{"type":"string","parseSpec":"..."}
 
-type：若没有指定，默认为**string**,当使用hadoop index时使用**hadoopyString**
-
-parseSpec：指定时间戳，格式，数据长度等,详见[parseSpec](/ingestion-spec/dataschema/parsespec.md "parseSpec") 
+_type_：若没有指定，默认为**string**,当使用hadoop index时使用**hadoopyString**
+_parseSpec_：指定时间戳，格式，数据长度等,详见[parseSpec](/ingestion-spec/dataschema/parsespec.md "parseSpec") 
 ### metricsSpec
 聚合条件的集合，详见[Aggregations](/ingestion-spec/dataschema/aggregations.md "Aggregations")
 ### granularitySpec
