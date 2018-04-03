@@ -1,9 +1,4 @@
-# 摄入规格 Ingestion Spec
-Druid 摄入规格中包含三个元素：
-```json
-{"dataSchema":{...},"ioConfig":{...},"tuningConfig":{...}}
-```
-## IOConfig
+## Stream Pull Ingestion
  结构：
 ```json
  {"type":"","firehose":{...},"plumber":{...}}
@@ -34,4 +29,8 @@ Druid 摄入规格中包含三个元素：
 ### 1. type
 realtime
 ### 2. firehose
-数据来源
+数据的来源
+
+### 3. plumber
+　数据的去向  `realtime`
+
