@@ -50,11 +50,11 @@
 ```
 ### 1. DataSource
 数据源名称，可以理解为数据库的表
-### 2. [parseSpec](/ingestion-spec/dataschema/parsespec.md "parseSpec")
+### 2. parse
 指定如何解析摄入的数据。
-
-　　　　{"type":"string","parseSpec":"..."}
-
+```json
+{"type":"string","parseSpec":"..."}
+```
 _type_：若没有指定，默认为**string**,当使用hadoop index时使用**hadoopyString**
 _parseSpec_：指定时间戳，格式，数据长度等,详见[parseSpec](/ingestion-spec/dataschema/parsespec.md "parseSpec") 
 ### 3. metricsSpec
