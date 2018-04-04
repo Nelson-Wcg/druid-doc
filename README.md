@@ -32,7 +32,7 @@ GROUP BY timestamp, publisher, advertiser, gender, country
  2011-01-01T01:00:00Z  bieberfever.com    google.com  Male   USA     2912        42     29.18
  2011-01-01T02:00:00Z  ultratrimfast.com  google.com  Male   UK      1953        17     17.31
  2011-01-01T02:00:00Z  bieberfever.com    google.com  Male   UK      3194        170    34.01```
-事实上,这种预聚合的方式可以很显著的减少数据的存储(可减少100倍)。 Druid也是通过这种方式来减少数据的存储。 这种减少存储的方式也会带来副作用,比如我们没有办法再查询到每条数据具体的明细。换句话说,数据聚合的粒度是我们能查询数据的最小粒度。 因此,Druid在ingestionSpecs中需要定义queryGranularity作为数据的粒度,最小能支持的 <font color="red">queryGranularity</font> 是毫秒。
+事实上,这种预聚合的方式可以很显著的减少数据的存储(可减少100倍)。 Druid也是通过这种方式来减少数据的存储。 这种减少存储的方式也会带来副作用,比如我们没有办法再查询到每条数据具体的明细。换句话说,数据聚合的粒度是我们能查询数据的最小粒度。 因此,Druid在ingestionSpecs中需要定义queryGranularity作为数据的粒度,最小能支持的 <font color=#00FFFF>queryGranularity</font> 是毫秒。
 
 ###数据Sharding
 Druid以segments的形式就行分片,并且以时间作为第一级分片。在上面我们合并的数据集中,我们可以每小时一个,创建两个segments。
