@@ -13,5 +13,7 @@
     * [Batch Data Ingestion](ingestion-spec/ioconfig and TuningConfig/batch-data-ingestion.md)
     * [KafkaSupervisorIOConfig](ingestion-spec/ioconfig and TuningConfig/kafkasupervisorioconfig.md)
   * [TuningConfig](ingestion-spec/tuningconfig.md)
-* [Query](query.md)
+* [查询](query.md)
+  * [Timeseries查询](query/timeseries-queries.md)
+  * DataSource
 
