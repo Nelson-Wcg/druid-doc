@@ -32,62 +32,62 @@ GROUP BY timestamp, publisher, advertiser, gender, country
  2011-01-01T01:00:00Z  bieberfever.com    google.com  Male   USA     2912        42     29.18
  2011-01-01T02:00:00Z  ultratrimfast.com  google.com  Male   UK      1953        17     17.31
  2011-01-01T02:00:00Z  bieberfever.com    google.com  Male   UK      3194        170    34.01```
-事实上,这种预聚合的方式可以很显著的减少数据的存储(可减少100倍)。 Druid也是通过这种方式来减少数据的存储。 这种减少存储的方式也会带来副作用,比如我们没有办法再查询到每条数据具体的明细。换句话说,数据聚合的粒度是我们能查询数据的最小粒度。 因此,Druid在ingestionSpecs中需要定义queryGranularity作为数据的粒度,最小能支持的 <font color=#00FFFF>queryGranularity</font> 是毫秒。
+事实上,这种预聚合的方式可以很显著的减少数据的存储(可减少100倍)。 Druid也是通过这种方式来减少数据的存储。 这种减少存储的方式也会带来副作用,比如我们没有办法再查询到每条数据具体的明细。换句话说,数据聚合的粒度是我们能查询数据的最小粒度。 因此,Druid在ingestionSpecs中需要定义`queryGranularity`作为数据的粒度,最小能支持的 `queryGranularity` 是毫秒。
 
 ###数据Sharding
-Druid以segments的形式就行分片,并且以时间作为第一级分片。在上面我们合并的数据集中,我们可以每小时一个,创建两个segments。
+Druid以`segments`的形式就行分片,并且以时间作为第一级分片。在上面我们合并的数据集中,我们可以每小时一个,创建两个segments。
 
 例如:
 
-Segment sampleData_2011-01-01T01:00:00:00Z_2011-01-01T02:00:00:00Z_v1_0 包含
-
+Segment `sampleData_2011-01-01T01:00:00:00Z_2011-01-01T02:00:00:00Z_v1_0` 包含
+```
  2011-01-01T01:00:00Z  ultratrimfast.com  google.com  Male   USA     1800        25     15.70
- 2011-01-01T01:00:00Z  bieberfever.com    google.com  Male   USA     2912        42     29.18
-Segment sampleData_2011-01-01T02:00:00:00Z_2011-01-01T03:00:00:00Z_v1_0 包含
-
+ 2011-01-01T01:00:00Z  bieberfever.com    google.com  Male   USA     2912        42     29.18```
+Segment `sampleData_2011-01-01T02:00:00:00Z_2011-01-01T03:00:00:00Z_v1_0` 包含
+```
  2011-01-01T02:00:00Z  ultratrimfast.com  google.com  Male   UK      1953        17     17.31
- 2011-01-01T02:00:00Z  bieberfever.com    google.com  Male   UK      3194        170    34.01
+ 2011-01-01T02:00:00Z  bieberfever.com    google.com  Male   UK      3194        170    34.01```
 Segments是自包含容器,包含着一个时间段内的数据。Segments包括基于列的压缩,以及这些列的索引。Druid只需要清楚如何扫描这些segments就可以查询。
 
-Segments通过datasource, interval, version, 和一个可选的partition number来区分。查看下例子中的segments,名称的格式如下: dataSource_interval_version_partitionNumber。
+Segments通过datasource, interval, version, 和一个可选的partition number来区分。查看下例子中的segments,名称的格式如下: `dataSource_interval_version_partitionNumber`。
 
-数据索引
+###数据索引
 提升Druid速度部分依赖于它怎样存储数据。借鉴search infrastructure的思想,Druid创建不变的快照数据,为分析查询提供极优的数据结构来存储。
 
 Druid是列式存储,这就意味这每一个列都是单独存储,在查询的过程中Druid只扫描查询呢所需的列即可。不同的列可以采用不同的压缩方式,也可以关联不同的索引。
 
 Druid的索引是基于每一个分片(即segment)上的。
 
-数据加载
+###数据加载
 Druid有实时和批量两种数据加载方式。实时加载数据是尽力而为型的,目前也不支持exactly once,但是我们已经计划加入这一特性。 批量加载是exactly once的,通过批量处理能保证数据的精确。 Druid使用的通常情况是,近期的数据通过实时方式处理,离线批量处理来来提高精度。
 
-数据查询
+###数据查询
 Druid原生的查询方式是通过http发送json,但是社区已经贡献出多种查询库,包括SQL。
 
 Druid被设计为执行单表操作,不支持join操纵(实际上可以做join)。 生产环境需要在ETL阶段进行join,因为数据在加载进Druid之前必须规范化。
 
-Druid集群
+###Druid集群
 Druid集群有不同节点组成,每个节点都很好都设计成做一小部分事情。
 
-Historical节点 Historical节点是Druid集群都骨干, 它下载不变的segments到本地,并提供segments的查询服务。 Historical节点采用shared nothing的架构,能够清楚怎样下载segments,删除segments,以及为segments提供查询服务。
+* **Historical节点** Historical节点是Druid集群都骨干, 它下载不变的segments到本地,并提供segments的查询服务。 Historical节点采用shared nothing的架构,能够清楚怎样下载segments,删除segments,以及为segments提供查询服务。
 
-Broker节点 Broker节点是客户端和应用程序从Druid查询数据的地方。Broker节点负责分发查询,以及收集和合并结果。 Broker节点清楚每一个segment在哪个Historical节点查询。
+* **Broker节点** Broker节点是客户端和应用程序从Druid查询数据的地方。Broker节点负责分发查询,以及收集和合并结果。 Broker节点清楚每一个segment在哪个Historical节点查询。
 
-Coordinator节点 Coordinator节点管理集群中historical节点的segments。Coordinator节点通知historical节点下载新的segments,删除旧的segments,以及迁移segments以达到负载均衡。
+* **Coordinator节点** Coordinator节点管理集群中historical节点的segments。Coordinator节点通知historical节点下载新的segments,删除旧的segments,以及迁移segments以达到负载均衡。
 
-Real-time处理 Real-time处理目前可以通过独立的realtime节点,或者通过indexing service实现,这两种方式都很常见。 Real-time处理包括加载数据、创建数据索引(创建segments)、以及交接segments给historical节点。数据立马可查只要实时处理逻辑加载。数据交接的过程也是安全的,数据在整个流程中都保持可查。
+* **Real-time处理** Real-time处理目前可以通过独立的realtime节点,或者通过indexing service实现,这两种方式都很常见。 Real-time处理包括加载数据、创建数据索引(创建segments)、以及交接segments给historical节点。数据立马可查只要实时处理逻辑加载。数据交接的过程也是安全的,数据在整个流程中都保持可查。
 
-外部依赖
+###外部依赖
 Druid的集群需要有一些外部依赖。
 
-Zookeeper Druid依赖Zookeeper来保证集群内的信息一致。
+* **Zookeeper** Druid依赖Zookeeper来保证集群内的信息一致。
 
-Metadata Storage Druid依赖metadata storage存储segments的元数据和配置。创建segments的服务在元数据中记录信息, coordinator监听着元数据以便了解什么时候需要下载新数据或者删除旧数据。 元数据的存储不涉及查询的路径。MySQL和PostgreSQL非常有利于生产环境下元数据的存储, 但Derby在你部署单机版做测试的时候非常好用。
+* **Metadata Storage** Druid依赖metadata storage存储segments的元数据和配置。创建segments的服务在元数据中记录信息, coordinator监听着元数据以便了解什么时候需要下载新数据或者删除旧数据。 元数据的存储不涉及查询的路径。MySQL和PostgreSQL非常有利于生产环境下元数据的存储, 但Derby在你部署单机版做测试的时候非常好用。
 
-Deep Storage Deep storage是segments的永久备份。创建segments的服务上传segments到Deep storage,然后historical节点下载。 Deep storage不涉及查询路径。 S3和HDFS是比较推荐到deep storages。
+* **Deep Storage Deep** storage是segments的永久备份。创建segments的服务上传segments到Deep storage,然后historical节点下载。 Deep storage不涉及查询路径。 S3和HDFS是比较推荐到deep storages。
 
-高可用到特性
+###高可用到特性
 Druid的涉及没有单点故障。不同类型的节点失败也不会影响到其他类型节点的正常服务。 为了到达高可用集群的目的,你最好至少每种节点类型运行在两台机器。
 
-综合结构
+###综合结构
 想要对Druid对结构有一个整体对了解,轻阅读我们的 白皮书.
